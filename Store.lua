@@ -69,6 +69,7 @@ function F.AddPost(author, channel, text, guid)
         tinsert(posts, 1, p)
     end
     p.needsRole = needsMyRole(p.info)
+    if F.CheckWatches then F.CheckWatches(p, p.count == 1) end
     prune()
     if F.OnPost then F.OnPost(p) end
     return p

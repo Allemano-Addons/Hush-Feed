@@ -9,4 +9,5 @@
 Core.lua
 Classify.lua
 Store.lua
+Watches.lua
 UI.lua

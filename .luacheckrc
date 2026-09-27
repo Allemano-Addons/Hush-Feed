@@ -15,5 +15,5 @@ read_globals = {
     "sort", "floor", "ceil", "min", "max", "format", "date", "time", "CopyTable", "geterrorhandler",
     "CreateFrame", "UIParent", "DEFAULT_CHAT_FRAME", "GetTime", "Ambiguate", "GetPlayerInfoByGUID",
     "UISpecialFrames", "C_Timer", "RAID_CLASS_COLORS", "CUSTOM_CLASS_COLORS", "SetItemRef", "GameTooltip",
-    "InCombatLockdown", "IsShiftKeyDown", "GetCursorPosition", "GetChannelList", "GetChannelName",
+    "PlaySound", "SOUNDKIT", "UnitAffectingCombat", "InCombatLockdown", "IsShiftKeyDown", "GetCursorPosition", "GetChannelList", "GetChannelName",
 }

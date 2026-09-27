@@ -124,6 +124,16 @@ SlashCmdList.HUSHFEED = function(msg)
         else
             F.Print("Usage: /feed role tank|healer|dps|none")
         end
+    elseif cmd == "sound" then
+        local known = false
+        for _, s in ipairs(F.SOUNDS) do if s.id == strlower(rest) then known = true end end
+        if known then
+            F.db.watchSound = strlower(rest)
+            F.PlaySound(F.db.watchSound)
+            F.Print("Watch sound:", F.db.watchSound)
+        else
+            F.Print("Sounds: bell, ping, raid, whisper, click")
+        end
     elseif cmd == "test" then
         F.InjectSamples()
         F.Print("Added sample posts. Try /feed dump or /feed stats.")

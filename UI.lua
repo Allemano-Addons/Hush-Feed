@@ -92,6 +92,17 @@ local function createRow()
     r:SetHeight(ROW_H)
     r:EnableMouse(true)
     enableLinks(r)
+    -- Matches of a watch: accent bar and a faint accent tint.
+    r.watchTint = r:CreateTexture(nil, "BACKGROUND")
+    r.watchTint:SetAllPoints()
+    r.watchBar = r:CreateTexture(nil, "ARTWORK")
+    r.watchBar:SetPoint("TOPLEFT")
+    r.watchBar:SetPoint("BOTTOMLEFT")
+    r.watchBar:SetWidth(3)
+    W.OnAccent(function(cr, cg, cb)
+        r.watchTint:SetColorTexture(cr, cg, cb, 0.07)
+        r.watchBar:SetColorTexture(cr, cg, cb, 1)
+    end)
     r.hover = W.Fill(r, "selected", 0.6)
     r.hover:SetAllPoints()
     r.hover:Hide()
@@ -177,6 +188,8 @@ local function fillRow(r, p)
     -- Older posts fade out before they expire.
     local window = (F.db.window or 15) * 60
     r:SetAlpha((time() - p.last) > window * 0.66 and 0.45 or 1)
+    r.watchTint:SetShown(p.watched == true)
+    r.watchBar:SetShown(p.watched == true)
 end
 
 -- ---------------------------------------------------------------------------
@@ -206,10 +219,85 @@ function UI.SetOffset(v)
     render()
 end
 
+-- Watches in the sidebar: click shows the matches (and clears the badge), right-click edits.
+local watchRows = {}
+local MAX_WATCH_ROWS = 5
+
+local function watchRow(i)
+    local b = watchRows[i]
+    if b then return b end
+    b = CreateFrame("Button", nil, frame.side)
+    b:SetHeight(28)
+    b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    b.sel = W.Fill(b, "selected", 1)
+    b.sel:SetAllPoints()
+    b.label = W.Text(b, "semibold", 0, "textDim")
+    b.label:SetPoint("LEFT", PAD, 0)
+    b.label:SetWidth(SIDE_W - PAD * 2 - 44)
+    b.badge = W.Badge(b)
+    b.badge:SetPoint("RIGHT", -PAD, 0)
+    b:SetScript("OnClick", function(self, button)
+        local w = F.WatchById(self.watchId)
+        if not w then return end
+        if button == "RightButton" then
+            W.OpenMenu({
+                { text = "Edit", onClick = function() F.EditWatch(w) end },
+                { text = w.paused and "Resume" or "Pause", onClick = function()
+                    w.paused = not w.paused
+                    F.RecheckWatches()
+                    UI.Refresh()
+                end },
+                { separator = true },
+                { text = "Delete", danger = true, onClick = function()
+                    F.DeleteWatch(w.id)
+                    if state.watch == w.id then state.watch = nil end
+                    F.RecheckWatches()
+                    UI.Refresh()
+                end },
+            })
+        else
+            state.watch = w.id
+            state.offset = 0
+            UI.Refresh()
+        end
+    end)
+    watchRows[i] = b
+    return b
+end
+
+local function layoutWatches()
+    local y = frame.watchTop
+    local list = F.db.watches
+    for i = 1, max(#list, #watchRows) do
+        local w = list[i]
+        if w and i <= MAX_WATCH_ROWS then
+            local b = watchRow(i)
+            b.watchId = w.id
+            b:ClearAllPoints()
+            b:SetPoint("TOPLEFT", frame.side, "TOPLEFT", 0, y)
+            b:SetPoint("TOPRIGHT", frame.side, "TOPRIGHT", 0, y)
+            b.label:SetText(w.name .. (w.paused and " |cff7c858f(paused)|r" or ""))
+            local active = state.watch == w.id
+            b.sel:SetShown(active)
+            b.label:SetTextColor(Theme:Color(active and "text" or "textDim"))
+            b.badge:SetCount(F.hits[w.id] or 0)
+            b:Show()
+            y = y - 28
+        elseif watchRows[i] then
+            watchRows[i]:Hide()
+        end
+    end
+    frame.newWatch:ClearAllPoints()
+    frame.newWatch:SetPoint("TOPLEFT", frame.side, "TOPLEFT", PAD - 8, y - 4)
+end
+
 local function updateSidebar()
     local counts = F.Counts()
+    -- Viewing a watch counts as seeing its matches.
+    if state.watch then F.hits[state.watch] = 0 end
+    layoutWatches()
     for _, b in ipairs(feedButtons) do
-        local active = b.id == state.cat
+        local active = not state.watch and b.id == state.cat
         b.sel:SetShown(active)
         b.label:SetTextColor(Theme:Color(active and "text" or "textDim"))
         b.count:SetText(counts[b.id] or 0)
@@ -227,8 +315,10 @@ function UI.Refresh()
     if not frame or not frame:IsShown() then return end
     local q = strlower(strtrim(state.search))
     wipe(items)
-    for _, p in ipairs(F.Posts(state.cat)) do
-        if matchesSearch(p, q) then items[#items + 1] = p end
+    -- A selected watch shows its matches from all categories.
+    for _, p in ipairs(F.Posts(state.watch and "all" or state.cat)) do
+        local inWatch = not state.watch or (p.watchIds and p.watchIds[state.watch])
+        if inWatch and matchesSearch(p, q) then items[#items + 1] = p end
     end
     state.offset = min(state.offset, maxOffset())
     updateSidebar()
@@ -356,6 +446,7 @@ local function build()
         b.count:SetPoint("RIGHT", -PAD, 0)
         b:SetScript("OnClick", function(self)
             state.cat = self.id
+            state.watch = nil
             state.offset = 0
             UI.Refresh()
         end)
@@ -364,9 +455,9 @@ local function build()
 
     local watchY = -92 - #FEEDS * 34 - 22
     header(side, "WATCHES", watchY)
-    local noWatch = W.Text(side, "regular", -1, "textFaint")
-    noWatch:SetPoint("TOPLEFT", PAD, watchY - 22)
-    noWatch:SetText("Watches arrive in the next step.")
+    frame.watchTop = watchY - 18
+    frame.side = side
+    frame.newWatch = W.Button(side, "+  New watch", "ghost", function() F.EditWatch(nil) end)
 
     local chHeader = W.Text(side, "heading", -1, "textFaint")
     chHeader:SetPoint("BOTTOMLEFT", PAD, 62)

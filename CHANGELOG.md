@@ -20,3 +20,9 @@
 - Virtualized list; refreshes only while the window is open (at most twice a second on busy channels, plus every 20 s for ages). Movable, resizable, position saved, ESC closes, follows the Hush theme (incl. Blizzard Style).
 - Requires Hush 0.1.27 (`Hush.OpenWhisper`, list icon).
 - Sorting from the first window test: a role AFTER "LF" is a group looking for players ("LF TANK RFC" → Needs your role), a role BEFORE "LF" is a player ("DPS LF RFC"); "-1DPS" / "- 1 tank" is a missing role; "anyone doing <dungeon>" is LFG; "service"/"taxi" are services (beating a `< >` tag). The regression test now also checks LFM/LFG and roles.
+
+### Step 4 – Watches
+- Saved searches: a name, words that must ALL be in the post, and a category (Any / LFG / Trade / Services / Guilds). "+ New watch" opens an editor; right-click a watch for Edit, Pause/Resume, Delete.
+- A new match plays a sound (also when the Feed window is closed; never in combat; at most one per 3 s), adds to the watch's badge and highlights the row (accent bar + tint). A merged repeat (xN) does not alert again.
+- Clicking a watch shows only its matches (from all categories) and clears its badge.
+- Sounds: Bell (default), Ping, Raid warning, Whisper, Click – `/feed sound <name>` until the settings page exists.

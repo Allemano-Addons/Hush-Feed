@@ -3,15 +3,29 @@
 -- roles an LFM asks for. Whole words only ("wts" does not match inside another word).
 local _, F = ...
 
+-- Strong words are clear ads (weight 1, services 1.5 so "WTS summons" is a service);
+-- weak words are common in normal talk (weight 0.5): one weak word alone is not enough.
 local WORDS = {
-    trade = { "wts", "wtb", "wtt", "selling", "buying", "sell", "buy", "for sale", "price", "pst", "cod" },
-    lfg = { "lfg", "lfm", "lf1m", "lf2m", "lf3m", "lf4m", "lf", "need tank", "need heal", "need healer", "need heals",
-            "need dps", "looking for group", "group for", "run", "runs" },
-    services = { "portal", "portals", "port", "ports", "summon", "summons", "summoning", "enchant", "enchants",
-                 "enchanting", "can craft", "crafting", "craft", "tips", "lockpick", "lockpicking", "boost", "boosting" },
-    guilds = { "recruit", "recruits", "recruiting", "guild", "raiding", "raid team", "apply", "semi-hardcore",
-               "hardcore", "casual", "progression" },
+    trade = {
+        strong = { "wts", "wtb", "wtt", "for sale", "pst", "cod" },
+        weak = { "selling", "buying", "sell", "buy", "price", "cheap" },
+    },
+    lfg = {
+        strong = { "lfg", "lfm", "lf1m", "lf2m", "lf3m", "lf4m", "lf", "need tank", "need heal", "need healer",
+                   "need heals", "need dps", "looking for group", "group for" },
+        weak = { "run", "runs", "tank", "healer", "dps" },
+    },
+    services = {
+        strong = { "portal", "portals", "port", "ports", "summon", "summons", "summoning", "summ", "summs", "sums",
+                   "enchant", "enchants", "enchanting", "can craft", "lockpick", "lockpicking", "boost", "boosting" },
+        weak = { "crafting", "craft", "tips" },
+    },
+    guilds = {
+        strong = { "recruit", "recruits", "recruiting", "raid team", "semi-hardcore", "progression" },
+        weak = { "guild", "raiding", "apply", "hardcore", "casual" },
+    },
 }
+local WEIGHT = { trade = 1, lfg = 1, services = 1.5, guilds = 1 }
 
 -- Dungeons and raids: a hint for LFG.
 local INSTANCES = {
@@ -61,17 +75,19 @@ function F.Classify(text, channel)
     local items = select(2, (text or ""):gsub("|Hitem:", ""))
     local s = {}
     for cat, words in pairs(WORDS) do
-        s[cat] = score(plain, words) + score(plain, extra[cat] or {})
+        s[cat] = (score(plain, words.strong) + score(plain, extra[cat] or {})) * WEIGHT[cat] + score(plain, words.weak) * 0.5
     end
-    s.lfg = s.lfg + (score(plain, INSTANCES) > 0 and 1 or 0)
+    s.lfg = s.lfg + (score(plain, INSTANCES) > 0 and 0.5 or 0) -- short names ("live", "st") are also normal words
     if items > 0 and s.lfg == 0 then s.trade = s.trade + 1 end
     local hint = CHANNEL_HINT[strlower(channel or "")]
     if hint then s[hint] = s[hint] + 0.5 end
     -- <Guild Name> in a post is a strong guild hint.
     if plain:find("<[^>]+>") then s.guilds = s.guilds + 1 end
 
-    local cat, best = "other", 0
-    for _, c in ipairs({ "trade", "lfg", "services", "guilds" }) do
+    -- At least one real keyword is needed: the channel alone never decides.
+    local cat, best = "other", 0.99
+    -- On a tie, the more specific kind wins ("WTS summons" in Trade is a service).
+    for _, c in ipairs({ "services", "lfg", "trade", "guilds" }) do
         if s[c] > best then cat, best = c, s[c] end
     end
 

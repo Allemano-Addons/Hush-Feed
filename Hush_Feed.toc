@@ -1,0 +1,11 @@
+## Interface: 16001
+## Title: Hush Feed
+## Notes: Sorts and filters channel chat (Trade, General, Services, LFG...) for Hush.
+## Version: 0.1.0
+## Dependencies: Hush
+## SavedVariables: HushFeedDB
+## IconTexture: Interface\AddOns\Hush\Media\logo
+
+Core.lua
+Classify.lua
+Store.lua

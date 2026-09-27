@@ -81,7 +81,7 @@ function F.Posts(cat, windowMinutes)
     for _, p in ipairs(posts) do
         -- Spam only shows when asked for explicitly.
         local match = (cat == p.cat) or ((not cat or cat == "all") and p.cat ~= "spam")
-        if p.last >= cutoff and not p.hidden and match then
+        if p.last >= cutoff and not p.hidden and match and not F.muted[p.author] then
             list[#list + 1] = p
         end
     end
@@ -99,6 +99,11 @@ function F.Counts(windowMinutes)
 end
 
 function F.Hide(p) p.hidden = true end
+
+-- Muted players (this session): their posts are left out of the feed.
+F.muted = {}
+function F.Mute(author) F.muted[author] = true end
+function F.Unmute(author) F.muted[author] = nil end
 
 function F.Clear()
     wipe(posts)

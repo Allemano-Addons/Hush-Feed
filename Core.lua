@@ -3,7 +3,7 @@
 local addonName, F = ...
 
 F.name = addonName
-local Hush = Hush
+
 
 function F.Print(...)
     local msg = strjoin(" ", tostringall(...))
@@ -108,7 +108,9 @@ SLASH_HUSHFEED2 = "/hf"
 SlashCmdList.HUSHFEED = function(msg)
     local cmd, rest = strtrim(msg or ""):match("^(%S*)%s*(.-)$")
     cmd = strlower(cmd or "")
-    if cmd == "dump" then
+    if cmd == "" then
+        F.UI.Toggle()
+    elseif cmd == "dump" then
         dump(rest ~= "" and strlower(rest) or nil)
     elseif cmd == "stats" then
         local counts = F.Counts()
@@ -129,9 +131,6 @@ SlashCmdList.HUSHFEED = function(msg)
         F.Clear()
         F.Print("Feed cleared.")
     else
-        F.Print("/feed dump [lfg|trade|services|guilds|other|spam], /feed stats, /feed role <role>, /feed test, /feed clear")
+        F.Print("/feed - open the window, /feed dump [lfg|trade|services|guilds|other|spam], /feed stats, /feed role <role>, /feed test, /feed clear")
     end
 end
-
--- Silence "unused" for Hush until the UI uses it (step 2).
-F.Hush = Hush

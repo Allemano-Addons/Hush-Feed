@@ -112,8 +112,8 @@ SlashCmdList.HUSHFEED = function(msg)
         dump(rest ~= "" and strlower(rest) or nil)
     elseif cmd == "stats" then
         local counts = F.Counts()
-        F.Print(("all %d · lfg %d · trade %d · services %d · guilds %d · other %d"):format(
-            counts.all, counts.lfg, counts.trade, counts.services, counts.guilds, counts.other))
+        F.Print(("all %d · lfg %d · trade %d · services %d · guilds %d · other %d · spam filtered %d"):format(
+            counts.all, counts.lfg, counts.trade, counts.services, counts.guilds, counts.other, counts.spam))
     elseif cmd == "role" then
         local r = strlower(rest)
         if r == "tank" or r == "healer" or r == "dps" or r == "none" then
@@ -129,7 +129,7 @@ SlashCmdList.HUSHFEED = function(msg)
         F.Clear()
         F.Print("Feed cleared.")
     else
-        F.Print("/feed dump [lfg|trade|services|guilds|other], /feed stats, /feed role <role>, /feed test, /feed clear")
+        F.Print("/feed dump [lfg|trade|services|guilds|other|spam], /feed stats, /feed role <role>, /feed test, /feed clear")
     end
 end
 

@@ -1,4 +1,5 @@
 std = "lua51"
+exclude_files = { "Tests/**" }
 max_line_length = false
 self = false
 

@@ -7,7 +7,7 @@ local byKey = {}
 local nextId = 0
 local MAX_AGE = 60 * 60 -- the longest window (60 min)
 
-F.CATEGORIES = { "lfg", "trade", "services", "guilds", "other" }
+F.CATEGORIES = { "lfg", "trade", "services", "guilds", "other" } -- "spam" is kept apart
 
 -- Same player + same text (links as names, spacing and case ignored) = the same post.
 local function keyFor(author, plain)
@@ -79,7 +79,9 @@ function F.Posts(cat, windowMinutes)
     local cutoff = time() - (windowMinutes or F.db.window or 15) * 60
     local list = {}
     for _, p in ipairs(posts) do
-        if p.last >= cutoff and not p.hidden and (not cat or cat == "all" or p.cat == cat) then
+        -- Spam only shows when asked for explicitly.
+        local match = (cat == p.cat) or ((not cat or cat == "all") and p.cat ~= "spam")
+        if p.last >= cutoff and not p.hidden and match then
             list[#list + 1] = p
         end
     end
@@ -92,6 +94,7 @@ function F.Counts(windowMinutes)
         counts.all = counts.all + 1
         counts[p.cat] = counts[p.cat] + 1
     end
+    counts.spam = #F.Posts("spam", windowMinutes)
     return counts
 end
 

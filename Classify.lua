@@ -63,9 +63,24 @@ local function score(text, list)
     return n
 end
 
--- Plain lowercase text: links become their names, colors are removed.
+-- Gold sellers: block graphics, web addresses, or Cyrillic look-alike letters mixed into
+-- Latin words (a classic trick to get past filters).
+local SPAM_MARKS = { "█", "▓", "►", "◄", "■", "▲", "▼", "▶", "◀" }
+local function isSpam(text, plain)
+    local marks = 0
+    for _, m in ipairs(SPAM_MARKS) do
+        marks = marks + select(2, text:gsub(m, ""))
+    end
+    if marks >= 2 then return true end
+    if plain:find("%w%w+%.com%f[%W]") or plain:find("%w%w+%.net%f[%W]") or plain:find("www%.") then return true end
+    -- UTF-8 Cyrillic (lead bytes 0xD0/0xD1) directly next to a Latin letter.
+    if plain:find("[a-z][\208\209]") or plain:find("[\208\209][\128-\191][a-z]") then return true end
+    return false
+end
+
+-- Plain lowercase text: links become their names (as separate words), colors are removed.
 function F.Plain(text)
-    return strlower((text or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|H.-|h%[?(.-)%]?|h", "%1"))
+    return strlower((text or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|H.-|h%[?(.-)%]?|h", " %1 "))
 end
 
 -- Returns cat, info = { lfType = "lfm"/"lfg"/nil, roles = { tank = true, ... }, items = n }.
@@ -73,12 +88,23 @@ function F.Classify(text, channel)
     local plain = F.Plain(text)
     local extra = F.db and F.db.keywords or {}
     local items = select(2, (text or ""):gsub("|Hitem:", ""))
+    if isSpam(text or "", plain) then return "spam", { items = items }, plain end
+    local profs = select(2, (text or ""):gsub("|Htrade:", ""))
     local s = {}
     for cat, words in pairs(WORDS) do
         s[cat] = (score(plain, words.strong) + score(plain, extra[cat] or {})) * WEIGHT[cat] + score(plain, words.weak) * 0.5
     end
     s.lfg = s.lfg + (score(plain, INSTANCES) > 0 and 0.5 or 0) -- short names ("live", "st") are also normal words
-    if items > 0 and s.lfg == 0 then s.trade = s.trade + 1 end
+    -- An item link alone is only a hint (people link items in normal talk too).
+    if items > 0 and s.lfg == 0 then s.trade = s.trade + 0.5 end
+    -- A profession link ([Tailoring]) is a crafting service.
+    if profs > 0 then s.services = s.services + 1.5 end
+    -- "need" or "lf" plus a role asks for players, even as "need - TANK -".
+    if has(plain, "need") or has(plain, "lf") then
+        for _, words in pairs(ROLE_WORDS) do
+            if score(plain, words) > 0 then s.lfg = s.lfg + 1 break end
+        end
+    end
     local hint = CHANNEL_HINT[strlower(channel or "")]
     if hint then s[hint] = s[hint] + 0.5 end
     -- <Guild Name> in a post is a strong guild hint.

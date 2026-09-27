@@ -83,6 +83,17 @@ function F.Plain(text)
     return strlower((text or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|H.-|h%[?(.-)%]?|h", " %1 "))
 end
 
+-- Guild recruitment in Russian/Ukrainian (stems, matched inside words: word boundaries do
+-- not work for Cyrillic bytes). Lowercase only, as usually typed.
+local CYRILLIC_GUILD = { "гільді", "гильди", "набір", "набор", "рейд", "спільнот", "сообществ", "комьюніт", "коммьюнит" }
+
+local function cyrillicGuild(plain)
+    for _, stem in ipairs(CYRILLIC_GUILD) do
+        if plain:find(stem, 1, true) then return true end
+    end
+    return false
+end
+
 -- Returns cat, info = { lfType = "lfm"/"lfg"/nil, roles = { tank = true, ... }, items = n }.
 function F.Classify(text, channel)
     local plain = F.Plain(text)
@@ -109,6 +120,7 @@ function F.Classify(text, channel)
     if hint then s[hint] = s[hint] + 0.5 end
     -- <Guild Name> in a post is a strong guild hint.
     if plain:find("<[^>]+>") then s.guilds = s.guilds + 1 end
+    if cyrillicGuild(plain) then s.guilds = s.guilds + 1 end
 
     -- At least one real keyword is needed: the channel alone never decides.
     local cat, best = "other", 0.99

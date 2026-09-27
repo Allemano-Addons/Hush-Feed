@@ -21,6 +21,10 @@ local lines = {
   { "other", "Trade", "gonna need to show a little skin for those bags" },
   { "services", "Trade", "WTS summons to TB.  Whisper 'inv' for an invite!" },
   { "lfg", "LookingForGroup", "LFM Strat UD, need tank + heals" },
+  { "other", "General", "crippling poison on MH or OH?" },
+  { "guilds", "Trade", "WoW Forever попереду!  Ми збираємо сильну спільноту після релізу. Досвід Classic/TBC, PvE-прогрес, рейди та активне комьюніті! /w inv!" },
+  { "other", "Trade", "whats 9 + 10" },
+  { "other", "General", "'" },
   { "guilds", "General", "<Iron Oath> semi-hardcore raiding, recruiting healers and hunters" },
 }
 local bad = 0

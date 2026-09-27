@@ -474,6 +474,8 @@ local function build()
 
     local close = W.IconButton(content, "close", 24, "Close", function() frame:Hide() end, "x")
     close:SetPoint("TOPRIGHT", -8, -8)
+    local settings = W.IconButton(content, "settings", 24, "Feed settings", function() Hush.OpenSettings("feed") end)
+    settings:SetPoint("RIGHT", close, "LEFT", -4, 0)
 
     local search = W.EditBox(content, "Search posts, items, players", 32)
     search:SetPoint("TOPLEFT", PAD, -40)

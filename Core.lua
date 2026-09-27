@@ -120,6 +120,8 @@ SlashCmdList.HUSHFEED = function(msg)
         local r = strlower(rest)
         if r == "tank" or r == "healer" or r == "dps" or r == "none" then
             F.db.role = r
+            F.RefreshRoles()
+            F.UI.Refresh()
             F.Print("Role:", r)
         else
             F.Print("Usage: /feed role tank|healer|dps|none")
@@ -140,7 +142,9 @@ SlashCmdList.HUSHFEED = function(msg)
     elseif cmd == "clear" then
         F.Clear()
         F.Print("Feed cleared.")
+    elseif cmd == "options" or cmd == "settings" then
+        Hush.OpenSettings("feed")
     else
-        F.Print("/feed - open the window, /feed dump [lfg|trade|services|guilds|other|spam], /feed stats, /feed role <role>, /feed test, /feed clear")
+        F.Print("/feed - open the window, /feed options,/feed dump [lfg|trade|services|guilds|other|spam], /feed stats, /feed role <role>, /feed test, /feed clear")
     end
 end

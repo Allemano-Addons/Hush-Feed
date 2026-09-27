@@ -26,3 +26,8 @@
 - A new match plays a sound (also when the Feed window is closed; never in combat; at most one per 3 s), adds to the watch's badge and highlights the row (accent bar + tint). A merged repeat (xN) does not alert again.
 - Clicking a watch shows only its matches (from all categories) and clears its badge.
 - Sounds: Bell (default), Ping, Raid warning, Whisper, Click – `/feed sound <name>` until the settings page exists.
+
+### Step 5 – Settings
+- New "Feed" page in the Hush settings (`/feed options` or the gear in the Feed window): My role, default time window, watch sound (plays when you pick it), and Channels – toggle the defaults (incl. LocalDefense) and any channel you are in, add your own by name, turn a custom one off to remove it.
+- New "Feed sorting" page: extra words per category (LFG, Trade, Services, Guilds), added to the built-in words; they apply to new posts.
+- `/feed role` now updates the window right away.

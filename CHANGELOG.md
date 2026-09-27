@@ -31,3 +31,4 @@
 - New "Feed" page in the Hush settings (`/feed options` or the gear in the Feed window): My role, default time window, watch sound (plays when you pick it), and Channels – toggle the defaults (incl. LocalDefense) and any channel you are in, add your own by name, turn a custom one off to remove it.
 - New "Feed sorting" page: extra words per category (LFG, Trade, Services, Guilds), added to the built-in words; they apply to new posts.
 - `/feed role` now updates the window right away.
+- Click a post to see the whole message (click again to fold it); clicking an item link still shows the item.

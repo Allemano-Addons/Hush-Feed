@@ -22,7 +22,8 @@ local WINDOWS = { 5, 15, 30, 60 }
 local ROLES = { "none", "tank", "healer", "dps" }
 local ROLE_LABEL = { none = "My role: none", tank = "My role: Tank", healer = "My role: Healer", dps = "My role: DPS" }
 
-local frame, listArea, scrollbar, rowPool
+local frame, listArea, scrollbar, rowPool, measurer
+local layout
 local feedButtons = {}
 local state = { cat = "all", search = "", offset = 0, paused = false, pausedNew = 0 }
 local items = {}
@@ -109,6 +110,19 @@ local function createRow()
     W.Line(r, "bottom", "line")
     r:SetScript("OnEnter", function(self) self.hover:Show() end)
     r:SetScript("OnLeave", function(self) if not self:IsMouseOver() then self.hover:Hide() end end)
+    -- Click the post to show all of it (again to fold it); clicking a link does not count.
+    r:HookScript("OnHyperlinkClick", function(self) self.linkClicked = true end)
+    r:SetScript("OnMouseDown", function(self) self.linkClicked = false end)
+    r:SetScript("OnMouseUp", function(self, button)
+        local p = self.post
+        if button ~= "LeftButton" or not p then return end
+        C_Timer.After(0, function()
+            if self.linkClicked then return end
+            p.expanded = not p.expanded
+            layout()
+            UI.SetOffset(state.offset)
+        end)
+    end)
 
     r.cat = W.Text(r, "heading", -1, "textFaint")
     r.cat:SetPoint("TOPLEFT", PAD, -14)
@@ -161,6 +175,8 @@ local function createRow()
     return r
 end
 
+local function textWidth() return max(120, listArea:GetWidth() - PAD * 2 - CAT_W - BUTTONS_W) end
+
 local function fillRow(r, p)
     r.post = p
     r.cat:SetText(CAT_LABEL[p.cat] or "")
@@ -174,7 +190,8 @@ local function fillRow(r, p)
     r.need:SetPoint("LEFT", p.count > 1 and r.count or r.meta, "RIGHT", 8, 0)
     r.need:SetShown(p.needsRole == true)
 
-    r.text:SetWidth(max(120, listArea:GetWidth() - PAD * 2 - CAT_W - BUTTONS_W))
+    r.text:SetWidth(textWidth())
+    if r.text.SetMaxLines then r.text:SetMaxLines(p.expanded and 0 or 2) end
     r.text:SetText(p.text)
 
     -- Invite for players looking for a group and for services (portals, summons...).
@@ -196,18 +213,44 @@ end
 -- List
 -- ---------------------------------------------------------------------------
 
-local function contentH() return #items * ROW_H end
+-- Rows are ROW_H high; an expanded post is as high as its full text (measured once per width).
+local tops, total = {}, 0
+
+local function rowHeight(p)
+    if not p.expanded then return ROW_H end
+    local w = textWidth()
+    if p.fullW ~= w or p.fullT ~= p.text then
+        measurer:SetWidth(w)
+        measurer:SetText(p.text)
+        p.fullH = max(ROW_H, math.ceil(36 + measurer:GetStringHeight() + 14))
+        p.fullW, p.fullT = w, p.text
+    end
+    return p.fullH
+end
+
+function layout()
+    total = 0
+    for i, p in ipairs(items) do
+        tops[i] = total
+        total = total + rowHeight(p)
+    end
+    for i = #items + 1, #tops do tops[i] = nil end
+end
+
+local function contentH() return total end
 local function maxOffset() return max(0, contentH() - listArea:GetHeight()) end
 
 local function render()
     rowPool:ReleaseAll()
     local viewH = listArea:GetHeight()
-    local first = floor(state.offset / ROW_H) + 1
+    local first = 1
+    while first < #items and tops[first + 1] <= state.offset do first = first + 1 end
     for i = first, #items do
-        local top = (i - 1) * ROW_H - state.offset
+        local top = tops[i] - state.offset
         if top >= viewH then break end
         local r = rowPool:Acquire()
         fillRow(r, items[i])
+        r:SetHeight(rowHeight(items[i]))
         r:SetPoint("TOPLEFT", listArea, "TOPLEFT", 0, -top)
         r:SetPoint("TOPRIGHT", listArea, "TOPRIGHT", 0, -top)
     end
@@ -320,6 +363,7 @@ function UI.Refresh()
         local inWatch = not state.watch or (p.watchIds and p.watchIds[state.watch])
         if inWatch and matchesSearch(p, q) then items[#items + 1] = p end
     end
+    layout()
     state.offset = min(state.offset, maxOffset())
     updateSidebar()
     render()
@@ -524,7 +568,7 @@ local function build()
     frame.footer:SetPoint("LEFT", PAD, 0)
     local hint = W.Text(foot, "regular", -1, "textFaint")
     hint:SetPoint("RIGHT", -PAD - 16, 0)
-    hint:SetText("Older posts fade out and expire")
+    hint:SetText("Click a post to see all of it · older posts fade out")
 
     -- List
     listArea = CreateFrame("Frame", nil, content)
@@ -532,6 +576,11 @@ local function build()
     listArea:SetPoint("BOTTOMRIGHT", foot, "TOPRIGHT")
     listArea:SetClipsChildren(true)
     W.Line(listArea, "top", "line")
+    -- Invisible copy of a row's text, used to measure expanded posts.
+    measurer = W.Text(listArea, "regular", 1, "text")
+    measurer:SetPoint("TOPLEFT")
+    measurer:SetWordWrap(true)
+    measurer:SetAlpha(0)
     listArea:EnableMouseWheel(true)
     listArea:SetScript("OnMouseWheel", function(_, delta) UI.SetOffset(state.offset - delta * ROW_H) end)
     listArea:SetScript("OnSizeChanged", function() if frame:IsShown() then UI.Refresh() end end)

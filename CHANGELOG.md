@@ -36,3 +36,4 @@
 
 ## 0.1.1 (in progress)
 - `Hush.Feed`: a small public API for other Hush modules (posts, shared "My role", a callback for new posts). Used by Hush LFG.
+- "LF enchanter", "LF tailor", "LF alchemist" and other crafters are Services, not LFG.

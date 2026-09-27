@@ -34,6 +34,8 @@ local lines = {
   { "services", "Trade", "< Taxi Service > Thunderbluff /w" },
   { "services", "Trade", "WTB summon TB" },
   { "guilds", "General", "<Homies Forever> is building its launch roster. Progression raiders who also enjoy PvP and just love the game" },
+  { "services", "Trade", "LF ENCHANTER UC" },
+  { "services", "Trade", "LF tailor to craft" },
 }
 local bad = 0
 for _, l in ipairs(lines) do

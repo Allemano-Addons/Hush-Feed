@@ -18,7 +18,10 @@ local WORDS = {
     services = {
         strong = { "portal", "portals", "port", "ports", "summon", "summons", "summoning", "summ", "summs", "sums",
                    "service", "services", "taxi",
-                   "enchant", "enchants", "enchanting", "can craft", "lockpick", "lockpicking", "boost", "boosting" },
+                   "enchant", "enchants", "enchanting", "can craft", "lockpick", "lockpicking", "boost", "boosting",
+                   -- "LF enchanter" asks for a crafter, not a group.
+                   "enchanter", "enchanters", "alchemist", "alch", "tailor", "blacksmith", "leatherworker", "lw",
+                   "engineer", "lockpicker", "crafter" },
         weak = { "crafting", "craft", "tips" },
     },
     guilds = {

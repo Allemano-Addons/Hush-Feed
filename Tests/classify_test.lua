@@ -26,12 +26,23 @@ local lines = {
   { "other", "Trade", "whats 9 + 10" },
   { "other", "General", "'" },
   { "guilds", "General", "<Iron Oath> semi-hardcore raiding, recruiting healers and hunters" },
+  -- Optional 4th/5th value: expected lfType and a role the post asks for.
+  { "lfg", "Trade", "LF TANK RFC LAST SPOT", "lfm", "tank" },
+  { "lfg", "Trade", "DPS LF RFC", "lfg" },
+  { "lfg", "Trade", "SFK -1DPS", "lfm", "dps" },
+  { "lfg", "Trade", "Anyone doing BFD ?" },
+  { "services", "Trade", "< Taxi Service > Thunderbluff /w" },
+  { "services", "Trade", "WTB summon TB" },
+  { "guilds", "General", "<Homies Forever> is building its launch roster. Progression raiders who also enjoy PvP and just love the game" },
 }
 local bad = 0
 for _, l in ipairs(lines) do
-  local cat = F.Classify(l[3], l[2])
+  local cat, info = F.Classify(l[3], l[2])
   local ok = cat == l[1]
+  if l[4] and info.lfType ~= l[4] then ok = false end
+  if l[5] and not (info.roles and info.roles[l[5]]) then ok = false end
   if not ok then bad = bad + 1 end
-  print(string.format("%s %-9s (want %-8s) %s", ok and "OK " or "BAD", cat, l[1], l[3]:gsub("|c%x+|H.-|h", ""):sub(1, 50)))
+  print(string.format("%s %-9s %-4s (want %-8s) %s", ok and "OK " or "BAD", cat, tostring(info.lfType), l[1],
+    l[3]:gsub("|c%x+|H.-|h", ""):sub(1, 50)))
 end
 print(bad == 0 and "ALL OK" or (bad .. " wrong"))

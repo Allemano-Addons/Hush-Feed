@@ -19,3 +19,4 @@
 - Rows: category, class-colored name, channel · age, xN for merged repeats, "Needs your role", the text with clickable item links; Whisper (opens Hush), Invite (players looking for a group, services), × hides the post. Right-click a name: Whisper or Mute (this session). Older posts fade before they expire.
 - Virtualized list; refreshes only while the window is open (at most twice a second on busy channels, plus every 20 s for ages). Movable, resizable, position saved, ESC closes, follows the Hush theme (incl. Blizzard Style).
 - Requires Hush 0.1.27 (`Hush.OpenWhisper`, list icon).
+- Sorting from the first window test: a role AFTER "LF" is a group looking for players ("LF TANK RFC" → Needs your role), a role BEFORE "LF" is a player ("DPS LF RFC"); "-1DPS" / "- 1 tank" is a missing role; "anyone doing <dungeon>" is LFG; "service"/"taxi" are services (beating a `< >` tag). The regression test now also checks LFM/LFG and roles.

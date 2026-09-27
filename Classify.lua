@@ -13,10 +13,11 @@ local WORDS = {
     lfg = {
         strong = { "lfg", "lfm", "lf1m", "lf2m", "lf3m", "lf4m", "lf", "need tank", "need heal", "need healer",
                    "need heals", "need dps", "looking for group", "group for" },
-        weak = { "run", "runs", "tank", "healer", "dps" },
+        weak = { "run", "runs", "tank", "healer", "dps", "anyone doing", "anyone up for" },
     },
     services = {
         strong = { "portal", "portals", "port", "ports", "summon", "summons", "summoning", "summ", "summs", "sums",
+                   "service", "services", "taxi",
                    "enchant", "enchants", "enchanting", "can craft", "lockpick", "lockpicking", "boost", "boosting" },
         weak = { "crafting", "craft", "tips" },
     },
@@ -61,6 +62,30 @@ local function score(text, list)
         if has(text, w) then n = n + 1 end
     end
     return n
+end
+
+-- Position of the first whole-word match of any of the words, or nil.
+local function firstPos(text, words)
+    local best
+    for _, w in ipairs(words) do
+        has(text, w) -- builds the cached pattern
+        local s = text:find(cache[w])
+        if s and (not best or s < best) then best = s end
+    end
+    return best
+end
+
+local ALL_ROLE_WORDS = {}
+for _, words in pairs(ROLE_WORDS) do
+    for _, w in ipairs(words) do ALL_ROLE_WORDS[#ALL_ROLE_WORDS + 1] = w end
+end
+
+-- "-1dps", "- 1 tank", "-heal": a group missing that role.
+local function dashRole(text)
+    for _, w in ipairs(ALL_ROLE_WORDS) do
+        if text:find("%-%s*%d*%s*" .. w .. "%f[%W]") then return true end
+    end
+    return false
 end
 
 -- Gold sellers: block graphics, web addresses, or Cyrillic look-alike letters mixed into
@@ -111,6 +136,7 @@ function F.Classify(text, channel)
     -- A profession link ([Tailoring]) is a crafting service.
     if profs > 0 then s.services = s.services + 1.5 end
     -- "need" or "lf" plus a role asks for players, even as "need - TANK -".
+    if dashRole(plain) then s.lfg = s.lfg + 1 end
     if has(plain, "need") or has(plain, "lf") then
         for _, words in pairs(ROLE_WORDS) do
             if score(plain, words) > 0 then s.lfg = s.lfg + 1 break end
@@ -131,13 +157,20 @@ function F.Classify(text, channel)
 
     local info = { items = items }
     if cat == "lfg" then
-        if has(plain, "lfm") or plain:find("%f[%w]lf%dm%f[%W]") or has(plain, "need") then
+        -- A group looking for players: "LFM", "LF1M", "need", "-1 dps", or a role AFTER "LF"
+        -- ("LF TANK RFC"). A role BEFORE "LF" is a player looking for a group ("DPS LF RFC").
+        local lfPos, rolePos = firstPos(plain, { "lf" }), firstPos(plain, ALL_ROLE_WORDS)
+        if has(plain, "lfm") or plain:find("%f[%w]lf%dm%f[%W]") or has(plain, "need") or dashRole(plain)
+            or (lfPos and rolePos and rolePos > lfPos) then
             info.lfType = "lfm"
             info.roles = {}
             for role, words in pairs(ROLE_WORDS) do
                 if score(plain, words) > 0 then info.roles[role] = true end
+                for _, w in ipairs(words) do
+                    if plain:find("%-%s*%d*%s*" .. w .. "%f[%W]") then info.roles[role] = true end
+                end
             end
-        elseif has(plain, "lfg") or has(plain, "looking for group") then
+        elseif has(plain, "lfg") or has(plain, "looking for group") or lfPos then
             info.lfType = "lfg"
         end
     end

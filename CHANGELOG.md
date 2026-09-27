@@ -32,3 +32,4 @@
 - New "Feed sorting" page: extra words per category (LFG, Trade, Services, Guilds), added to the built-in words; they apply to new posts.
 - `/feed role` now updates the window right away.
 - Click a post to see the whole message (click again to fold it); clicking an item link still shows the item.
+- Pause now really freezes the list: only the posts shown when you pressed Pause, in the same order, even if you hide a post, switch feed, search or resize. Resume shows everything.

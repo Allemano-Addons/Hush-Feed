@@ -361,7 +361,12 @@ function UI.Refresh()
     -- A selected watch shows its matches from all categories.
     for _, p in ipairs(F.Posts(state.watch and "all" or state.cat)) do
         local inWatch = not state.watch or (p.watchIds and p.watchIds[state.watch])
-        if inWatch and matchesSearch(p, q) then items[#items + 1] = p end
+        local frozenOut = state.frozen and not state.frozen[p]
+        if inWatch and not frozenOut and matchesSearch(p, q) then items[#items + 1] = p end
+    end
+    -- While paused, keep the order from when Pause was pressed (repeats move posts to the top).
+    if state.frozen then
+        sort(items, function(a, b) return state.frozen[a] < state.frozen[b] end)
     end
     layout()
     state.offset = min(state.offset, maxOffset())
@@ -533,6 +538,13 @@ local function build()
     frame.pauseBtn = W.Button(content, "Pause", "default", function()
         state.paused = not state.paused
         state.pausedNew = 0
+        -- Pause freezes the posts shown now: only these (in this order) until Resume.
+        if state.paused then
+            state.frozen = {}
+            for i, p in ipairs(F.Posts("all", 60)) do state.frozen[p] = i end
+        else
+            state.frozen = nil
+        end
         updateTopBar()
         if not state.paused then UI.Refresh() end
     end)

@@ -7,10 +7,12 @@ globals = {
     "HushFeedDB",
     "SLASH_HUSHFEED1", "SLASH_HUSHFEED2", "SlashCmdList",
     "HushFeedFrame", -- window name, only so ESC closes it
+    -- Hush is read-only except Hush.Feed, the public API for other modules.
+    Hush = { read_only = true, other_fields = true, fields = { Feed = { read_only = false, other_fields = true } } },
 }
 
 read_globals = {
-    "Hush",
+    -- (Hush: see globals)
     "strjoin", "strsplit", "strtrim", "strlower", "strupper", "tostringall", "tinsert", "tremove", "wipe",
     "sort", "floor", "ceil", "min", "max", "format", "date", "time", "CopyTable", "geterrorhandler",
     "CreateFrame", "UIParent", "DEFAULT_CHAT_FRAME", "GetTime", "Ambiguate", "GetPlayerInfoByGUID",

@@ -33,3 +33,6 @@
 - `/feed role` now updates the window right away.
 - Click a post to see the whole message (click again to fold it); clicking an item link still shows the item.
 - Pause now really freezes the list: only the posts shown when you pressed Pause, in the same order, even if you hide a post, switch feed, search or resize. Resume shows everything.
+
+## 0.1.1 (in progress)
+- `Hush.Feed`: a small public API for other Hush modules (posts, shared "My role", a callback for new posts). Used by Hush LFG.

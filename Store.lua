@@ -72,6 +72,10 @@ function F.AddPost(author, channel, text, guid)
     if F.CheckWatches then F.CheckWatches(p, p.count == 1) end
     prune()
     if F.OnPost then F.OnPost(p) end
+    for _, fn in ipairs(F.listeners) do
+        local ok, err = pcall(fn, p)
+        if not ok then geterrorhandler()(err) end
+    end
     return p
 end
 

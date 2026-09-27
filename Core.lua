@@ -145,6 +145,26 @@ SlashCmdList.HUSHFEED = function(msg)
     elseif cmd == "options" or cmd == "settings" then
         Hush.OpenSettings("feed")
     else
-        F.Print("/feed - open the window, /feed options,/feed dump [lfg|trade|services|guilds|other|spam], /feed stats, /feed role <role>, /feed test, /feed clear")
+        F.Print("/feed - open the window, /feed options, /feed dump [lfg|trade|services|guilds|other|spam], /feed stats, /feed role <role>, /feed test, /feed clear")
     end
 end
+
+-- ---------------------------------------------------------------------------
+-- Public API for other Hush modules (Hush_LFG): Hush.Feed
+-- ---------------------------------------------------------------------------
+
+local Hush = Hush
+F.listeners = {}
+Hush.Feed = {
+    apiVersion = 1,
+    -- Posts inside the time window, newest first (cat = nil for all).
+    Posts = function(cat, windowMinutes) return F.Posts(cat, windowMinutes) end,
+    GetRole = function() return F.db and F.db.role or "none" end,
+    SetRole = function(role)
+        F.db.role = role
+        F.RefreshRoles()
+        if F.UI then F.UI.Refresh() end
+    end,
+    -- fn(post) runs for every new or repeated post.
+    OnPost = function(fn) tinsert(F.listeners, fn) end,
+}

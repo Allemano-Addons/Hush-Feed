@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (in progress)
+## 0.1.0 (2026-09-27)
 
 ### Step 1 – Capture and sorting
 - Module skeleton (`## Dependencies: Hush`), `HushFeedDB` for settings only – the feed itself lives in memory and is never saved.

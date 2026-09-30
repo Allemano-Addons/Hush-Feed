@@ -2,9 +2,12 @@
 ## Title: Hush Feed
 ## Notes: Sorts and filters channel chat (Trade, General, Services, LFG...) for Hush.
 ## Version: 0.1.1
+## Author: Allemano
+## Category: Chat
+## X-Curse-Project-ID: 1719071
 ## Dependencies: Hush
 ## SavedVariables: HushFeedDB
-## IconTexture: Interface\AddOns\Hush\Media\logo
+## IconTexture: Interface\AddOns\Hush\Media\wow\icon
 
 Core.lua
 Classify.lua

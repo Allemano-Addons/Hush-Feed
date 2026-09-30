@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Hush Feed
 ## Notes: Sorts and filters channel chat (Trade, General, Services, LFG...) for Hush.
-## Version: 0.1.1
+## Version: 0.1.2
 ## Author: Allemano
 ## Category: Chat
 ## X-Curse-Project-ID: 1719071

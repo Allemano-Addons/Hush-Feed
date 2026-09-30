@@ -34,6 +34,9 @@
 - Click a post to see the whole message (click again to fold it); clicking an item link still shows the item.
 - Pause now really freezes the list: only the posts shown when you pressed Pause, in the same order, even if you hide a post, switch feed, search or resize. Resume shows everything.
 
-## 0.1.1 (in progress)
+## 0.1.1 – 2026-09-30
 - `Hush.Feed`: a small public API for other Hush modules (posts, shared "My role", a callback for new posts). Used by Hush LFG.
 - "LF enchanter", "LF tailor", "LF alchemist" and other crafters are Services, not LFG.
+
+## 0.1.2 – 2026-09-30
+- Fix for WoW Forever's secret values: channel messages with secret text are skipped instead of causing an error.

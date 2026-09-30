@@ -48,6 +48,11 @@ frame:SetScript("OnEvent", function(_, event, ...)
         frame:UnregisterEvent("ADDON_LOADED")
         frame:RegisterEvent("CHAT_MSG_CHANNEL")
     elseif event == "CHAT_MSG_CHANNEL" then
+        -- Secret text/sender (instances, boss fights on WoW Forever) can't be read: skip it.
+        if issecretvalue then
+            local text, sender, _, channel = ...
+            if issecretvalue(text) or issecretvalue(sender) or issecretvalue(channel) then return end
+        end
         -- Protected, so a problem here never breaks anything else.
         local ok, err = pcall(F.OnChannelMessage, ...)
         if not ok then geterrorhandler()(err) end

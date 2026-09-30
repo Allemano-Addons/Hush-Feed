@@ -12,6 +12,7 @@ globals = {
 }
 
 read_globals = {
+    "issecretvalue",
     -- (Hush: see globals)
     "strjoin", "strsplit", "strtrim", "strlower", "strupper", "tostringall", "tinsert", "tremove", "wipe",
     "sort", "floor", "ceil", "min", "max", "format", "date", "time", "CopyTable", "geterrorhandler",

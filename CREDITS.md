@@ -1,6 +1,6 @@
 # Credits
 
-**Hush Feed** is part of Allemano Addons (https://allemano-site.pages.dev).
+**Hush Feed** is part of Allemano Addons (https://allemano.org).
 
 ## How it is made
 
